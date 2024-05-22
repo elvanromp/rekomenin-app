@@ -33,7 +33,7 @@ export const questions = {
       // Java', 'Swift', 'JavaScript', 'Python', 'Tidak ada'
     },
     {
-      id: 2,
+      id: 4,
       question: "Bahasa pemrograman mana yang ingin anda pelajari lebih dalam?",
       answers: [{
         id: 1,
