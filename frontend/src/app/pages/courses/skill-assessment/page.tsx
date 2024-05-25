@@ -14,15 +14,27 @@ interface AnswerState {
   };
 }
 
+interface FormValues {
+  answers: {
+    [key: string]: {
+      [key: string]: boolean;
+    };
+  };
+}
+
 const SkillAssessment: React.FC = () => {
-  const methods = useForm({
+  const methods = useForm<FormValues>({
+    defaultValues: {
+      answers: {}
+    }
   });
+
   const [answers, setAnswers] = useState<AnswerState>(() => {
     const initialAnswers: AnswerState = {};
     questions.questions.forEach((question) => {
-      initialAnswers[question.id] = {};
+      initialAnswers[question.id.toString()] = {};
       question.answers.forEach((answer) => {
-        initialAnswers[question.id][answer.id] = false;
+        initialAnswers[question.id.toString()][answer.id.toString()] = false;
       });
     });
     return initialAnswers;
@@ -31,20 +43,24 @@ const SkillAssessment: React.FC = () => {
   useEffect(() => {
     console.log('Default answers:', answers);
   }, [answers]);
-  
+
   const handleCheckboxChange = (questionId: string, answerId: string) => (checked: boolean) => {
     setAnswers((prevAnswers) => ({
       ...prevAnswers,
       [questionId]: {
         ...prevAnswers[questionId],
-        [answerId]: checked ?? false,
+        [answerId]: checked,
       },
     }));
   };
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: FormValues) => {
     console.log("You submitted the following values:", data);
   };
+
+  useEffect(() => {
+    methods.reset({ answers });
+  }, [answers, methods]);
 
   return (
     <FormProvider {...methods}>
@@ -56,8 +72,9 @@ const SkillAssessment: React.FC = () => {
               <FormItem key={answer.id} className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                 <FormControl>
                   <Controller
-                    name={`answers[${question.id}][${answer.id}]`}
+                    name={`answers.${question.id.toString()}.${answer.id.toString()}`}
                     control={methods.control}
+                    defaultValue={answers[question.id.toString()][answer.id.toString()]}
                     render={({ field }) => (
                       <Checkbox
                         checked={field.value ?? false}

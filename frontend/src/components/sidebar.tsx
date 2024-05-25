@@ -9,7 +9,6 @@ const sidebarItems: SidebarItems = {
 
   links: [
     { label: 'Home', href: '/', icon: Home},
-    { label: 'Skill Assessment', href: '/pages/skill-assessment', icon: Brain},
     { label: 'Courses', href: '/pages/courses', icon: Book},
     { label: 'Jobs', href: '/pages/jobs', icon: HardHat},
     { label: 'Profile', href: '/pages/profile', icon: User},

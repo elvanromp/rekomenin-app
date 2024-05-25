@@ -1,5 +1,6 @@
 import React from 'react';
 import { Star, Clock, BarChart } from 'lucide-react';
+import Link from 'next/link';
 
 import { courses } from '@/app/courseList';
 
@@ -13,16 +14,16 @@ const CoursePage = () => {
       </div>
       <div className='course-path h-[3rem] mb-3 shadow-inner rounded-[0.6rem] w-full inline-flex flex-nowrap'>
         <ul className='flex items-center justify-center md:justify-start [&_img]:max-w-none animate-infinite-scroll'>
-          <li><a href="/pages/courses/1">Machine Learning</a></li>
-          <li><a href="/pages/courses/2">Android</a></li>
-          <li><a href="/pages/courses/3">iOS</a></li>
-          <li><a href="/pages/courses/4">Multi-Platform App</a></li>
-          <li><a href="/pages/courses/5">Data Scientist</a></li>
+          <li><Link href="/pages/courses/1">Machine Learning</Link></li>
+          <li><Link href="/pages/courses/2">Android</Link></li>
+          <li><Link href="/pages/courses/3">iOS</Link></li>
+          <li><Link href="/pages/courses/4">Multi-Platform App</Link></li>
+          <li><Link href="/pages/courses/5">Data Scientist</Link></li>
         </ul>
       </div>
       <div className='courses h-4/6 shadow-inner rounded-[0.6rem]'>
         <div className='course-wrapper grid grid-cols-2 gap-x-0 gap-y-8 justify-items-center'>
-          {courses.courses.map(course => (
+          {courses.courses.filter(course => course.learning_path === "iOS Developer").map(course => (
             <div key={course.id} className='course course-card'>
               <h2 className='title'>
                 {course.name}
