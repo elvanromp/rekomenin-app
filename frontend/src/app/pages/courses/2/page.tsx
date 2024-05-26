@@ -9,13 +9,14 @@ const CoursePage = () => {
     <main className='w-[74rem]'>
       <div className='course-header text-3xl h-2/6 mb-3 shadow-inner rounded-[0.6rem]'>
         <button>
-          <a href="/pages/courses/skill-assessment">Isi quiz dulu yuk untuk dapat rekomendasi!</a>
+          <a href="/pages/courses/preferensi">Isi quiz dulu yuk untuk dapat rekomendasi!</a>
         </button>
       </div>
       <div className='course-path h-[3rem] mb-3 shadow-inner rounded-[0.6rem] w-full inline-flex flex-nowrap'>
         <ul className='flex items-center justify-center md:justify-start [&_img]:max-w-none animate-infinite-scroll'>
+          <li><a href="/pages/courses">All</a></li>
           <li><Link href="/pages/courses/1">Machine Learning</Link></li>
-          <li><Link href="/pages/courses/2">Android</Link></li>
+          <li><Link href="/pages/courses/2" className='active-path'>Android</Link></li>
           <li><Link href="/pages/courses/3">iOS</Link></li>
           <li><Link href="/pages/courses/4">Multi-Platform App</Link></li>
           <li><Link href="/pages/courses/5">Data Scientist</Link></li>

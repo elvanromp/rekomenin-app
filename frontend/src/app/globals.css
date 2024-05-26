@@ -78,10 +78,7 @@
 }
 
 .active-path {
-  background-color: rgb(209 213 219);
   color: black;
-  padding: 4px 10px;
-  border-radius: 1rem;
 }
 
 .course-offer {
@@ -93,6 +90,7 @@
 
 .course-wrapper {
   padding-top: 1rem;
+  padding-bottom: 1rem;
 }
 
 .course {

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useForm, Controller, FormProvider } from "react-hook-form";
 import { questions } from "@/app/questionList";
-
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormControl, FormItem, FormLabel } from "@/components/ui/form";
@@ -22,7 +22,7 @@ interface FormValues {
   };
 }
 
-const SkillAssessment: React.FC = () => {
+const Preferensi: React.FC = () => {
   const methods = useForm<FormValues>({
     defaultValues: {
       answers: {}
@@ -54,8 +54,31 @@ const SkillAssessment: React.FC = () => {
     }));
   };
 
+  const router = useRouter();
+
   const onSubmit = (data: FormValues) => {
     console.log("You submitted the following values:", data);
+    const scores = calculateScores(data.answers);
+    localStorage.setItem("scores", JSON.stringify(scores));
+    router.push("/pages/courses/rekomendasi");
+  };
+
+  const calculateScores = (answers: { [key: string]: { [key: string]: boolean } }) => {
+    const scores: { [key: string]: number } = {};
+
+    questions.questions.forEach((question) => {
+      question.answers.forEach((answer) => {
+        if (answers[question.id]?.[answer.id]) {
+          const paths = answer.learning_path.split(", ");
+          paths.forEach((path) => {
+            if (!scores[path]) scores[path] = 0;
+            scores[path] += answer.point;
+          });
+        }
+      });
+    });
+
+    return scores;
   };
 
   useEffect(() => {
@@ -69,7 +92,7 @@ const SkillAssessment: React.FC = () => {
           <div key={question.id}>
             <h2>{question.question}</h2>
             {question.answers.map((answer) => (
-              <FormItem key={answer.id} className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormItem key={answer.id} className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 my-2">
                 <FormControl>
                   <Controller
                     name={`answers.${question.id.toString()}.${answer.id.toString()}`}
@@ -94,10 +117,10 @@ const SkillAssessment: React.FC = () => {
             ))}
           </div>
         ))}
-        <Button type="submit">Submit</Button>
+        <Button type="submit" className="">Submit</Button>
       </form>
     </FormProvider>
   );
 };
 
-export default SkillAssessment;
+export default Preferensi;
