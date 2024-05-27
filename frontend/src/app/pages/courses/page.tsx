@@ -32,29 +32,31 @@ const CoursePage = () => {
   }, []);
 
   return (
-    <main className='w-[74rem]'>
+    <main>
       <div className='course-header text-3xl h-2/6 mb-3 shadow-inner rounded-[0.6rem]'>
         {!selectedPath && (
           <button>
-            <a href="/courses/preferensi">Isi quiz dulu yuk untuk dapat rekomendasi!</a>
+            <a href="/pages/courses/preferensi">Isi quiz dulu yuk untuk dapat rekomendasi!</a>
           </button>
         )}
         {selectedPath && (
-          <div className='recommended-courses'>
-            <h2>Rekomendasi Courses:</h2>
-            {recommendedCourses.map(course => (
-              <div key={course.id} className='course course-card'>
-                <h2 className='title'>
-                  {course.name}
-                </h2>
-                <ul className='course-stat'>
-                  <li><Clock size={20} className='mr-[0.5rem]' /> {course.hours_to_study} Jam</li>
-                  <li><Star size={20} className='mr-[0.5rem]' /> {course.rating}</li>
-                  <li><BarChart size={20} className='mr-[0.5rem]'/> {course.level}</li>
-                </ul>
-                <p>{course.learning_path}</p>
-              </div>
-            ))}
+          <div className='recommended-courses p-5'>
+            <h2 className='mb-3'>Rekomendasi Courses:</h2>
+            <div className='grid grid-flow-col auto-cols-max'>
+              {recommendedCourses.map(course => (
+                <div key={course.id} className='course course-card mr-5'>
+                  <h2 className='title'>
+                    {course.name}
+                  </h2>
+                  <ul className='course-stat'>
+                    <li><Clock size={20} className='mr-[0.5rem]' /> {course.hours_to_study} Jam</li>
+                    <li><Star size={20} className='mr-[0.5rem]' /> {course.rating}</li>
+                    <li><BarChart size={20} className='mr-[0.5rem]'/> {course.level}</li>
+                  </ul>
+                  <p>{course.learning_path}</p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -68,10 +70,10 @@ const CoursePage = () => {
           <li><a href="/pages/courses/5">Data Scientist</a></li>
         </ul>
       </div>
-      <div className='courses h-4/6 shadow-inner rounded-[0.6rem]'>
-        <div className='course-wrapper grid grid-cols-2 gap-x-0 gap-y-8 justify-items-center'>
+      <div className='courses min-h-[80vh] shadow-inner rounded-[0.6rem]'>
+        <div className='course-wrapper grid grid-cols-3 gap-x-0 gap-y-8 justify-items-center'>
           {courses.courses.map(course => (
-            <div key={course.id} className='course course-card'>
+            <div key={course.id} className='course course-card w-[90%]'>
               <h2 className='title'>
                 {course.name}
               </h2>

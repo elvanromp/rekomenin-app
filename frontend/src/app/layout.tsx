@@ -19,12 +19,12 @@ export default function RootLayout({
 }>) {
   return (
 
-    <html lang="en" className="dark">
+    <html lang="en">
 
       <body className={inter.className}>
         <Sidebar />
 
-        <main className="ml-[300px] mt-4">{children}</main>
+        <main className="ml-[200px] px-8 py-4">{children}</main>
 
       </body>
 

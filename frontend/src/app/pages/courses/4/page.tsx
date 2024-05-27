@@ -6,7 +6,7 @@ import { courses } from '@/app/courseList';
 
 const CoursePage = () => {
   return (
-    <main className='w-[74rem]'>
+    <main >
       <div className='course-header text-3xl h-2/6 mb-3 shadow-inner rounded-[0.6rem]'>
         <button>
           <a href="/pages/courses/preferensi">Isi quiz dulu yuk untuk dapat rekomendasi!</a>
@@ -22,10 +22,10 @@ const CoursePage = () => {
           <li><Link href="/pages/courses/5">Data Scientist</Link></li>
         </ul>
       </div>
-      <div className='courses h-4/6 shadow-inner rounded-[0.6rem]'>
-        <div className='course-wrapper grid grid-cols-2 gap-x-0 gap-y-8 justify-items-center'>
+      <div className='courses min-h-[80vh] shadow-inner rounded-[0.6rem]'>
+        <div className='course-wrapper grid grid-cols-3 gap-x-0 gap-y-8 justify-items-center'>
           {courses.courses.filter(course => course.learning_path === "Multi-Platform App Developer").map(course => (
-            <div key={course.id} className='course course-card'>
+            <div key={course.id} className='course course-card w-[90%]'>
               <h2 className='title'>
                 {course.name}
               </h2>
