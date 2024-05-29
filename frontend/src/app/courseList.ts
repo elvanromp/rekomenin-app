@@ -3,7 +3,7 @@ export const courses = {
         {
             "id": 14,
             "name": "Belajar Fundamental Aplikasi Android",
-            "technology": "Android",
+            "technology": "Android,Multi Platform",
             "hours_to_study": 140,
             "rating": "4.84",
             "level": "PROFESSIONAL",
@@ -14,7 +14,7 @@ export const courses = {
         {
             "id": 51,
             "name": "Belajar Membuat Aplikasi Android untuk Pemula",
-            "technology": "Android",
+            "technology": "Android,Multi Platform",
             "hours_to_study": 60,
             "rating": "4.87",
             "level": "BEGINNER",
