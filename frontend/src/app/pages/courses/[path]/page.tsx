@@ -1,6 +1,7 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { Star, Clock, BarChart } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -14,11 +15,40 @@ import {
 } from "@/components/ui/carousel"
 import { Button } from "@/components/ui/button"
 
-import { courses } from '@/app/courseList';
+interface Course {
+  id: number;
+  name: string;
+  technology: string;
+  hours_to_study: number;
+  rating: string;
+  level: string;
+  learning_path: string;
+  total_modules: number;
+  registered_students: number | string;
+}
 
-const LearningPath:FC = () => {
+const LearningPath: FC = () => {
   const router = useRouter();
-  const path  = usePathname();
+  const path = usePathname();
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await axios.get('/api/courses');
+        setCourses(response.data);
+
+        const pathName = getPath();
+        const filtered = response.data.filter((course: Course) => course.learning_path === pathName);
+        setFilteredCourses(filtered);
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+      }
+    };
+
+    fetchCourses();
+  }, [path]);
 
   const getPath = (): string => {
     switch (path.split("/")[3]) {
@@ -36,8 +66,9 @@ const LearningPath:FC = () => {
         return 'Learning Path';
     }
   };
+
   return (
-    <main >
+    <main>
       <div className='course-header text-3xl h-2/6 mb-3 shadow-inner rounded-[0.6rem]'>
         <button>
           <a href="/pages/courses/preferensi">Isi quiz dulu yuk untuk dapat rekomendasi!</a>
@@ -71,7 +102,7 @@ const LearningPath:FC = () => {
       </div>
       <div className='courses min-h-[80vh] shadow-inner rounded-[0.6rem]'>
         <div className='course-wrapper grid grid-cols-3 gap-x-0 gap-y-8 justify-items-center'>
-          {courses.courses.filter(course => course.learning_path === getPath()).map(course => (
+          {filteredCourses.map(course => (
             <div key={course.id} className='course course-card mr-5 p-4 w-80 bg-white'>
               <div className='min-h-[70px]'>
                 <h3 className='title'>
@@ -97,11 +128,11 @@ const LearningPath:FC = () => {
                 </li>
               </ul>
               <div className='flex'>
-              {course.technology.split(",").map(itemTech => (
-                <div className='bg-[#E1F4E8] border-[#52B788] border-2 p-1 mr-2 mt-2 rounded'>
-                  <p className='leading-3 text-[#2D6A4F] font-medium'>{itemTech}</p>
-                </div>
-              ))}
+                {course.technology.split(",").map((itemTech, index) => (
+                  <div key={index} className='bg-[#E1F4E8] border-[#52B788] border-2 p-1 mr-2 mt-2 rounded'>
+                    <p className='leading-3 text-[#2D6A4F] font-medium'>{itemTech}</p>
+                  </div>
+                ))}
               </div>
             </div>
           ))}
