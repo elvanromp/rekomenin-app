@@ -160,7 +160,7 @@ const Preferensi: React.FC = () => {
             <Button type="button" onClick={handlePrevious} className="bg-white drop-shadow-md rounded">Previous</Button>
             <Button type="button" onClick={handleNext} className="bg-white drop-shadow-md rounded">Next</Button>
             {current===questions.questions.length-1?
-              <Button type="submit" onClick={(event) => methods.handleSubmit((data) => onSubmit(event, data))(event)}  className="">Submit</Button> :
+              <Button type="button" onClick={(event) => methods.handleSubmit((data) => onSubmit(event, data))(event)}  className="">Submit</Button> :
               <Button type="button" onClick={handleNext} className="bg-white drop-shadow-md rounded">Next</Button>
             }
           </div>
