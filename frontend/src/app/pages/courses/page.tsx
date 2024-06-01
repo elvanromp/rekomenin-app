@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Star, Clock, BarChart, Ghost } from 'lucide-react';
+import axios from 'axios';
+import { Star, Clock, BarChart } from 'lucide-react';
 import Link from 'next/link';
-import { courses } from '@/app/courseList';
 import {
   Carousel,
   CarouselContent,
@@ -12,6 +12,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import { Button } from "@/components/ui/button"
+
 interface Course {
   id: number;
   name: string;
@@ -27,16 +28,28 @@ interface Course {
 const CoursePage = () => {
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [recommendedCourses, setRecommendedCourses] = useState<Course[]>([]);
+  const [allCourses, setAllCourses] = useState<Course[]>([]);
 
   useEffect(() => {
-    const path = localStorage.getItem("selectedPath");
-    setSelectedPath(path);
-    if (path) {
-      const recommended = courses.courses.filter(course =>
-        course.learning_path.includes(path)
-      ).slice(0, 3);
-      setRecommendedCourses(recommended);
-    }
+    const fetchCourses = async () => {
+      try {
+        const response = await axios.get('/api/courses');
+        setAllCourses(response.data);
+
+        const path = localStorage.getItem("selectedPath");
+        setSelectedPath(path);
+        if (path) {
+          const recommended = response.data.filter((course: Course) =>
+            course.learning_path.includes(path)
+          ).slice(0, 3);
+          setRecommendedCourses(recommended);
+        }
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+      }
+    };
+
+    fetchCourses();
   }, []);
 
   return (
@@ -77,11 +90,11 @@ const CoursePage = () => {
                     </li>
                   </ul>
                   <div className='flex'>
-                  {course.technology.split(",").map(itemTech => (
-                    <div className='bg-[#E1F4E8] border-[#52B788] border-2 p-1 mr-2 mt-2 rounded'>
-                      <p className='leading-3 text-[#2D6A4F] font-medium'>{itemTech}</p>
-                    </div>
-                  ))}
+                    {course.technology.split(",").map((itemTech, index) => (
+                      <div key={index} className='bg-[#E1F4E8] border-[#52B788] border-2 p-1 mr-2 mt-2 rounded'>
+                        <p className='leading-3 text-[#2D6A4F] font-medium'>{itemTech}</p>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
@@ -117,7 +130,7 @@ const CoursePage = () => {
       </div>
       <div className='courses min-h-[80vh] shadow-inner rounded-[0.6rem]'>
         <div className='course-wrapper grid grid-cols-3 gap-x-0 gap-y-8 justify-items-center'>
-          {courses.courses.map(course => (
+          {allCourses.map(course => (
             <div key={course.id} className='course course-card mr-5 p-4 w-80 bg-white'>
               <div className='min-h-[70px]'>
                 <h3 className='title'>
@@ -143,11 +156,11 @@ const CoursePage = () => {
                 </li>
               </ul>
               <div className='flex'>
-              {course.technology.split(",").map(itemTech => (
-                <div className='bg-[#E1F4E8] border-[#52B788] border-2 p-1 mr-2 mt-2 rounded'>
-                  <p className='leading-3 text-[#2D6A4F] font-medium'>{itemTech}</p>
-                </div>
-              ))}
+                {course.technology.split(",").map((itemTech, index) => (
+                  <div key={index} className='bg-[#E1F4E8] border-[#52B788] border-2 p-1 mr-2 mt-2 rounded'>
+                    <p className='leading-3 text-[#2D6A4F] font-medium'>{itemTech}</p>
+                  </div>
+                ))}
               </div>
             </div>
           ))}
