@@ -7,7 +7,12 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormControl, FormItem, FormLabel } from "@/components/ui/form";
-
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel"
 interface AnswerState {
   [key: string]: {
     [key: string]: boolean;
@@ -23,6 +28,21 @@ interface FormValues {
 }
 
 const Preferensi: React.FC = () => {
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+  const handleNext = () => {
+    if (api) {
+      api.scrollNext();
+    }
+  };
+
+  const handlePrevious = () => {
+    if (api) {
+      api.scrollPrev();
+    }
+  };
+
   const methods = useForm<FormValues>({
     defaultValues: {
       answers: {}
@@ -56,7 +76,8 @@ const Preferensi: React.FC = () => {
 
   const router = useRouter();
 
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = (event: React.FormEvent, data: FormValues) => {
+    event.preventDefault();
     console.log("You submitted the following values:", data);
     const scores = calculateScores(data.answers);
     localStorage.setItem("scores", JSON.stringify(scores));
@@ -83,43 +104,69 @@ const Preferensi: React.FC = () => {
 
   useEffect(() => {
     methods.reset({ answers });
-  }, [answers, methods]);
+    if (!api) {
+      return;
+    }
+
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap());
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap());
+    });
+  }, [answers, methods, api]);
 
   return (
-    <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
-        {questions.questions.map((question) => (
-          <div key={question.id}>
-            <h2>{question.question}</h2>
-            {question.answers.map((answer) => (
-              <FormItem key={answer.id} className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 my-2">
-                <FormControl>
-                  <Controller
-                    name={`answers.${question.id.toString()}.${answer.id.toString()}`}
-                    control={methods.control}
-                    defaultValue={answers[question.id.toString()][answer.id.toString()]}
-                    render={({ field }) => (
-                      <Checkbox
-                        checked={field.value ?? false}
-                        onCheckedChange={(checked) => {
-                          const isChecked = typeof checked === 'boolean' ? checked : false;
-                          field.onChange(isChecked);
-                          handleCheckboxChange(question.id.toString(), answer.id.toString())(isChecked);
-                        }}
-                      />
-                    )}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>{answer.text}</FormLabel>
+    <div>
+      <FormProvider {...methods}>
+        <form className="space-y-6">
+        <Carousel setApi={setApi}>
+          <CarouselContent>
+            {questions.questions.map((question) => (
+              <CarouselItem key={question.id}>
+                <div className="border-[#52B788] border-2 px-4 py-5 rounded-xl">
+                  <b>Question {current+1}</b>
+                  <p>{question.question}</p>
                 </div>
-              </FormItem>
+                {question.answers.map((answer) => (
+                  <FormItem key={answer.id} className="flex flex-row items-start space-x-3 space-y-0 rounded drop-shadow-md px-10 py-4 my-2 bg-white">
+                    <FormControl>
+                      <Controller
+                        name={`answers.${question.id.toString()}.${answer.id.toString()}`}
+                        control={methods.control}
+                        defaultValue={answers[question.id.toString()][answer.id.toString()]}
+                        render={({ field }) => (
+                          <Checkbox
+                            checked={field.value ?? false}
+                            onCheckedChange={(checked) => {
+                              const isChecked = typeof checked === 'boolean' ? checked : false;
+                              field.onChange(isChecked);
+                              handleCheckboxChange(question.id.toString(), answer.id.toString())(isChecked);
+                            }}
+                          />
+                        )}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>{answer.text}</FormLabel>
+                    </div>
+                  </FormItem>
+                ))}
+              </CarouselItem>
             ))}
+            </CarouselContent>
+          </Carousel>
+          <div className="flex justify-between">
+            <Button type="button" onClick={handlePrevious} className="bg-white drop-shadow-md rounded">Previous</Button>
+            <Button type="button" onClick={handleNext} className="bg-white drop-shadow-md rounded">Next</Button>
+            {current===questions.questions.length-1?
+              <Button type="submit" onClick={(event) => methods.handleSubmit((data) => onSubmit(event, data))(event)}  className="">Submit</Button> :
+              <Button type="button" onClick={handleNext} className="bg-white drop-shadow-md rounded">Next</Button>
+            }
           </div>
-        ))}
-        <Button type="submit" className="">Submit</Button>
-      </form>
-    </FormProvider>
+        </form>
+      </FormProvider>
+    </div>
   );
 };
 
