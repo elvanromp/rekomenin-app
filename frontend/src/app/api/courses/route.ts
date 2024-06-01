@@ -22,19 +22,12 @@ export async function GET() {
   }
 }
 
-interface InsertResult {
-  insertId: number;
-  affectedRows: number;
-  // Add other properties if necessary
-}
-
-export async function POST(request: Request) {
+export async function POST(request: { json: () => PromiseLike<{ name: any; description: any; technology: any; hours_to_study: any; rating: any; level: any; learning_path: any; total_modules: any; registered_students: any; }> | { name: any; description: any; technology: any; hours_to_study: any; rating: any; level: any; learning_path: any; total_modules: any; registered_students: any; }; }) {
   try {
-    // Parse the JSON body of the request
-    const body = await request.json();
-    
-    // Destructure the fields you expect from the body
-    const { 
+    const { name, description, technology, hours_to_study, rating, level, learning_path, total_modules, registered_students } = await request.json();
+    console.log(name, description, technology, hours_to_study, rating, level, learning_path, total_modules, registered_students);
+
+    const result = await db.query("INSERT INTO courses SET ?", {
       name, 
       description, 
       technology, 
@@ -43,51 +36,16 @@ export async function POST(request: Request) {
       level, 
       learning_path, 
       total_modules, 
-      registered_students 
-    } = body;
-
-    // Check if all required fields are provided
-    if (
-      !name || 
-      !description || 
-      !technology || 
-      hours_to_study == null || 
-      rating == null || 
-      !level || 
-      !learning_path || 
-      total_modules == null || 
-      registered_students == null
-    ) {
-      return NextResponse.json(
-        { message: "Missing required fields" },
-        { status: 400 }
-      );
-    }
-
-    // Insert the new course into the database
-    const result: InsertResult = await new Promise((resolve, reject) => {
-      db.query(
-        "INSERT INTO courses (name, description, technology, hours_to_study, rating, level, learning_path, total_modules, registered_students) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [name, description, technology, hours_to_study, rating, level, learning_path, total_modules, registered_students],
-        (err: any, result: InsertResult) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(result);
-          }
-        }
-      );
+      registered_students
     });
 
-    // Return the response with the newly created course ID
-    return NextResponse.json(
-      { message: "Course inserted successfully", courseId: result.insertId },
-      { status: 201 }
-    );
+    return NextResponse.json({ name, description, technology, hours_to_study, rating, level, learning_path, total_modules, registered_students, id: result.insertId });
   } catch (error) {
     return NextResponse.json(
       { message: error },
-      { status: 500 }
-    );
+      {
+        status: 500
+      }
+    )
   }
 }
