@@ -16,7 +16,7 @@ const Rekomendasi: React.FC = () => {
 
   const handlePathClick = (path: string) => {
     localStorage.setItem("selectedPath", path);
-    router.push("/pages/courses");
+    router.push("/pages/courses/skill-assessment");
   };
 
   return (

@@ -10,8 +10,8 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/components/ui/carousel"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/carousel";
+import { Button } from "@/components/ui/button";
 
 interface Course {
   id: number;
@@ -26,7 +26,6 @@ interface Course {
 }
 
 const CoursePage = () => {
-  const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [recommendedCourses, setRecommendedCourses] = useState<Course[]>([]);
   const [allCourses, setAllCourses] = useState<Course[]>([]);
 
@@ -36,11 +35,12 @@ const CoursePage = () => {
         const response = await axios.get('/api/courses');
         setAllCourses(response.data);
 
-        const path = localStorage.getItem("selectedPath");
-        setSelectedPath(path);
-        if (path) {
+        const level = localStorage.getItem("level");
+        const learning_path = localStorage.getItem("learning_path");
+
+        if (level && learning_path) {
           const recommended = response.data.filter((course: Course) =>
-            course.learning_path.includes(path)
+            course.level === level && course.learning_path === learning_path
           ).slice(0, 3);
           setRecommendedCourses(recommended);
         }
@@ -55,15 +55,14 @@ const CoursePage = () => {
   return (
     <main>
       <div className='text-3xl h-2/6 mb-3'>
-        {!selectedPath && (
+        {recommendedCourses.length === 0 ? (
           <button>
             <a href="/pages/courses/preferensi">Isi quiz dulu yuk untuk dapat rekomendasi!</a>
           </button>
-        )}
-        {selectedPath && (
+        ) : (
           <div className='recommended-courses p-5'>
             <h2 className='title pri-c mb-3'>Rekomendasi Courses:</h2>
-            <div className='grid grid-flow-col auto-cols-max'>
+            <div className='grid grid-cols-3 gap-x-0 gap-y-8 justify-items-center'>
               {recommendedCourses.map(course => (
                 <div key={course.id} className='course course-card mr-5 p-4 w-80 bg-white'>
                   <div className='min-h-[70px]'>
