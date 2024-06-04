@@ -18,7 +18,6 @@ export async function GET() {
     return NextResponse.json({ message: error }, { status: 500 });
   }
 }
-
 export async function POST(request: {
   json: () =>
     | PromiseLike<{
@@ -29,7 +28,6 @@ export async function POST(request: {
         minimum_job_experience: any;
         talent_quota: any;
         job_type: any;
-        
       }>
     | {
         position: any;
@@ -51,8 +49,9 @@ export async function POST(request: {
       minimum_job_experience,
       talent_quota,
       job_type,
-      location
+      location,
     } = await request.json();
+
     console.log(
       position,
       sector,
@@ -72,7 +71,7 @@ export async function POST(request: {
       minimum_job_experience,
       talent_quota,
       job_type,
-      location
+      location,
     });
 
     return NextResponse.json({
@@ -83,7 +82,7 @@ export async function POST(request: {
       minimum_job_experience,
       talent_quota,
       job_type,
-      location
+      location,
       id: result.insertId,
     });
   } catch (error) {

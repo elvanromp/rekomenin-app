@@ -4,7 +4,7 @@ import db from "../../config/db";
 export async function GET() {
   try {
     const results = await new Promise((resolve, reject) => {
-      db.query("SELECT * FROM job-applicant", (err: any, results: []) => {
+      db.query("SELECT * FROM ratings", (err: any, results: []) => {
         if (err) {
           reject(err);
         } else {
@@ -22,27 +22,32 @@ export async function GET() {
 export async function POST(request: {
   json: () =>
     | PromiseLike<{
-        vacancy_id: any;
-        user_id: any;
+        respondent_identifier: any;
+        course_name: any;
+        rating: any;
       }>
     | {
-        vacancy_id: any;
-        user_id: any;
+        respondent_identifier: any;
+        course_name: any;
+        rating: any;
       };
 }) {
   try {
-    const { vacancy_id, user_id } = await request.json();
+    const { respondent_identifier, course_name, rating } = await request.json();
 
-    console.log(vacancy_id, user_id);
+    console.log(respondent_identifier, course_name, rating);
 
     const result = await db.query("INSERT INTO learning-path SET ?", {
-      vacancy_id,
-      user_id,
+      respondent_identifier,
+      course_name,
+      rating,
     });
 
     return NextResponse.json({
-      vacancy_id,
-      user_id,
+      respondent_identifier,
+      course_name,
+      rating,
+      id: result.insertId,
     });
   } catch (error) {
     return NextResponse.json(
