@@ -3,19 +3,29 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from 'lucide-react';
+import axios from 'axios';
+
+const id_user = 255;
 
 const Rekomendasi: React.FC = () => {
   const [topPaths, setTopPaths] = useState<string[]>([]);
   const router = useRouter();
 
   useEffect(() => {
-    const scores = JSON.parse(localStorage.getItem("scores") || "{}");
-    const sortedPaths = Object.keys(scores).sort((a, b) => scores[b] - scores[a]).slice(0, 3);
-    setTopPaths(sortedPaths);
+    const fetchUserPaths = async () => {
+      try {
+        const response = await axios.get(`/api/score?id_user=${id_user}`);
+        const userPaths = response.data;
+        setTopPaths(userPaths.map((path: { learning_path: string }) => path.learning_path));
+      } catch (error) {
+        console.error("Error fetching user learning paths:", error);
+      }
+    };
+
+    fetchUserPaths();
   }, []);
 
   const handlePathClick = (path: string) => {
-    localStorage.setItem("selectedPath", path);
     router.push("/pages/courses/skill-assessment");
   };
 

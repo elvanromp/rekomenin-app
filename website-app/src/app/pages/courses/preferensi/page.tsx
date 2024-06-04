@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useForm, Controller, FormProvider } from "react-hook-form";
-import { questions } from "@/app/questionList";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -12,11 +11,26 @@ import {
   CarouselContent,
   CarouselItem,
   type CarouselApi,
-} from "@/components/ui/carousel"
+} from "@/components/ui/carousel";
+import axios from "axios";
+
 interface AnswerState {
   [key: string]: {
     [key: string]: boolean;
   };
+}
+
+interface Question {
+  id_preferensi: number;
+  question: string;
+}
+
+interface Answer {
+  id_answer: number;
+  id_preferensi: number;
+  point: number;
+  text: string;
+  learning_path: string;
 }
 
 interface FormValues {
@@ -45,24 +59,41 @@ const Preferensi: React.FC = () => {
 
   const methods = useForm<FormValues>({
     defaultValues: {
-      answers: {}
-    }
+      answers: {},
+    },
   });
+
+  const [allQuestion, setAllQuestion] = useState<Question[]>([]);
+  const [allAnswer, setAllAnswer] = useState<Answer[]>([]);
+
+  useEffect(() => {
+    const fetchQuestion = async () => {
+      try {
+        const responseQuestion = await axios.get("/api/preferensi");
+        setAllQuestion(responseQuestion.data);
+        const responseAnswer = await axios.get("/api/answer-preferensi");
+        setAllAnswer(responseAnswer.data);
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      }
+    };
+
+    fetchQuestion();
+    console.log(allQuestion);
+  }, []);
 
   const [answers, setAnswers] = useState<AnswerState>(() => {
     const initialAnswers: AnswerState = {};
-    questions.questions.forEach((question) => {
-      initialAnswers[question.id.toString()] = {};
-      question.answers.forEach((answer) => {
-        initialAnswers[question.id.toString()][answer.id.toString()] = false;
-      });
+    allQuestion.forEach((question) => {
+      initialAnswers[question.id_preferensi.toString()] = {};
+      allAnswer
+        .filter((answer: Answer) => answer.id_preferensi === question.id_preferensi)
+        .forEach((answer) => {
+          initialAnswers[question.id_preferensi.toString()][answer.id_answer.toString()] = false;
+        });
     });
     return initialAnswers;
   });
-
-  useEffect(() => {
-    console.log('Default answers:', answers);
-  }, [answers]);
 
   const handleCheckboxChange = (questionId: string, answerId: string) => (checked: boolean) => {
     setAnswers((prevAnswers) => ({
@@ -78,25 +109,45 @@ const Preferensi: React.FC = () => {
 
   const onSubmit = (event: React.FormEvent, data: FormValues) => {
     event.preventDefault();
-    console.log("You submitted the following values:", data);
     const scores = calculateScores(data.answers);
-    localStorage.setItem("scores", JSON.stringify(scores));
+    const topScores = Object.entries(scores)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 3);
+
+    topScores.forEach(([key, value]) => {
+      const postData = {
+        id_user: 255,
+        learning_path: key,
+        preferensi_point: value,
+      };
+      axios
+        .post("/api/score", postData)
+        .then((response) => {
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    });
+
     router.push("/pages/courses/rekomendasi");
   };
 
   const calculateScores = (answers: { [key: string]: { [key: string]: boolean } }) => {
     const scores: { [key: string]: number } = {};
 
-    questions.questions.forEach((question) => {
-      question.answers.forEach((answer) => {
-        if (answers[question.id]?.[answer.id]) {
-          const paths = answer.learning_path.split(", ");
-          paths.forEach((path) => {
-            if (!scores[path]) scores[path] = 0;
-            scores[path] += answer.point;
-          });
-        }
-      });
+    allQuestion.forEach((question) => {
+      allAnswer
+        .filter((answer: Answer) => answer.id_preferensi === question.id_preferensi)
+        .forEach((answer) => {
+          if (answers[question.id_preferensi]?.[answer.id_answer]) {
+            const paths = answer.learning_path.split(", ");
+            paths.forEach((path) => {
+              if (!scores[path]) scores[path] = 0;
+              scores[path] += answer.point;
+            });
+          }
+        });
     });
 
     return scores;
@@ -120,49 +171,69 @@ const Preferensi: React.FC = () => {
     <div>
       <FormProvider {...methods}>
         <form className="space-y-6">
-        <Carousel setApi={setApi}>
-          <CarouselContent>
-            {questions.questions.map((question) => (
-              <CarouselItem key={question.id}>
-                <div className="border-[#52B788] border-2 px-4 py-5 rounded-xl">
-                  <b>Question {current+1}</b>
-                  <p>{question.question}</p>
-                </div>
-                {question.answers.map((answer) => (
-                  <FormItem key={answer.id} className="flex flex-row items-start space-x-3 space-y-0 rounded drop-shadow-md px-10 py-4 my-2 bg-white">
-                    <FormControl>
-                      <Controller
-                        name={`answers.${question.id.toString()}.${answer.id.toString()}`}
-                        control={methods.control}
-                        defaultValue={answers[question.id.toString()][answer.id.toString()]}
-                        render={({ field }) => (
-                          <Checkbox
-                            checked={field.value ?? false}
-                            onCheckedChange={(checked) => {
-                              const isChecked = typeof checked === 'boolean' ? checked : false;
-                              field.onChange(isChecked);
-                              handleCheckboxChange(question.id.toString(), answer.id.toString())(isChecked);
-                            }}
+          <Carousel setApi={setApi}>
+            <CarouselContent>
+              {allQuestion.map((question) => (
+                <CarouselItem key={question.id_preferensi}>
+                  <div className="border-[#52B788] border-2 px-4 py-5 rounded-xl">
+                    <b>Question {current + 1}</b>
+                    <p>{question.question}</p>
+                  </div>
+                  {allAnswer
+                    .filter((answer: Answer) => answer.id_preferensi === question.id_preferensi)
+                    .map((answer) => (
+                      <FormItem
+                        key={answer.id_answer}
+                        className="flex flex-row items-start space-x-3 space-y-0 rounded drop-shadow-md px-10 py-4 my-2 bg-white"
+                      >
+                        <FormControl>
+                          <Controller
+                            name={`answers.${question.id_preferensi.toString()}.${answer.id_answer.toString()}`}
+                            control={methods.control}
+                            defaultValue={
+                              answers?.[question.id_preferensi.toString()]?.[answer.id_answer.toString()]
+                            }
+                            render={({ field }) => (
+                              <Checkbox
+                                checked={field.value ?? false}
+                                onCheckedChange={(checked) => {
+                                  const isChecked = typeof checked === "boolean" ? checked : false;
+                                  field.onChange(isChecked);
+                                  handleCheckboxChange(
+                                    question.id_preferensi.toString(),
+                                    answer.id_answer.toString()
+                                  )(isChecked);
+                                }}
+                              />
+                            )}
                           />
-                        )}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>{answer.text}</FormLabel>
-                    </div>
-                  </FormItem>
-                ))}
-              </CarouselItem>
-            ))}
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>{answer.text}</FormLabel>
+                        </div>
+                      </FormItem>
+                    ))}
+                </CarouselItem>
+              ))}
             </CarouselContent>
           </Carousel>
           <div className="flex justify-between">
-            <Button type="button" onClick={handlePrevious} className="bg-white drop-shadow-md rounded">Previous</Button>
-            <Button type="button" onClick={handleNext} className="bg-white drop-shadow-md rounded">Next</Button>
-            {current===questions.questions.length-1?
-              <Button type="button" onClick={(event) => methods.handleSubmit((data) => onSubmit(event, data))(event)}  className="">Submit</Button> :
-              <Button type="button" onClick={handleNext} className="bg-white drop-shadow-md rounded">Next</Button>
-            }
+            <Button type="button" onClick={handlePrevious} className="bg-white drop-shadow-md rounded">
+              Previous
+            </Button>
+            {current === allQuestion.length - 1 ? (
+              <Button
+                type="button"
+                onClick={(event) => methods.handleSubmit((data) => onSubmit(event, data))(event)}
+                className=""
+              >
+                Submit
+              </Button>
+            ) : (
+              <Button type="button" onClick={handleNext} className="bg-white drop-shadow-md rounded">
+                Next
+              </Button>
+            )}
           </div>
         </form>
       </FormProvider>

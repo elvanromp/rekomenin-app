@@ -69,31 +69,31 @@ const SkillAssessment: React.FC = () => {
 
   const onSubmit = (data: FormValues) => {
     console.log("You submitted the following values:", data);
-    const totalPoints = calculateTotalPoints(data.answers);
-    const level = classifyLevel(totalPoints);
-    localStorage.setItem("level", level);
+    const totalPoint = calculateTotalPoint(data.answers);
+    const level = classifyLevel(totalPoint);
+    localStorage.setItem("", level);
     const learning_path = "Machine Learning"; // Assuming the user selects this path somewhere in your component
-    localStorage.setItem("learning_path", learning_path);
+    localStorage.setItem("", learning_path);
     router.push("/pages/courses");
   };
 
-  const calculateTotalPoints = (answers: { [key: string]: string }) => {
-    let totalPoints = 0;
+  const calculateTotalPoint = (answers: { [key: string]: string }) => {
+    let totalPoint = 0;
 
     questions.questions.forEach((question) => {
       const selectedAnswerId = answers[question.id];
       const selectedAnswer = question.answers.find(answer => answer.id.toString() === selectedAnswerId);
       if (selectedAnswer) {
-        totalPoints += selectedAnswer.point;
+        totalPoint += selectedAnswer.point;
       }
     });
 
-    return totalPoints;
+    return totalPoint;
   };
 
-  const classifyLevel = (points: number) => {
-    if (points <= 4) return "BEGINNER";
-    if (points <= 7) return "INTERMEDIATE";
+  const classifyLevel = (point: number) => {
+    if (point <= 4) return "BEGINNER";
+    if (point <= 7) return "INTERMEDIATE";
     return "PROFESSIONAL";
   };
 
