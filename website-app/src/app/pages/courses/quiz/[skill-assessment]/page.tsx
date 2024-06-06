@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useForm, Controller, FormProvider } from "react-hook-form";
 import axios from "axios";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { FormControl, FormItem, FormLabel } from "@/components/ui/form";
@@ -44,72 +44,55 @@ const SkillAssessment: React.FC = () => {
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
-  const [count, setCount] = useState(0);
 
   const methods = useForm<FormValues>({
     defaultValues: {
       answers: {},
     },
   });
-
   const router = useRouter();
+  const path = usePathname().split("/")[4].replace(/%20/g, ' ');
+
+  const id_user = "255";
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const selectedLearningPath = localStorage.getItem('selectedLearningPath');
+        const questionsResponse = await axios.get(`/api/skill-assessment?learning_path=${path}`);
+        const answersResponse = await axios.get(`/api/answer-assessment?learning_path=${path}`);
 
-        if (selectedLearningPath) {
-          const questionsResponse = await axios.get(`/api/skill-assessment?learning_path=${selectedLearningPath}`);
-          const answersResponse = await axios.get(`/api/answer-assessment?learning_path=${selectedLearningPath}`);
+        const filteredQuestions = questionsResponse.data.filter((question: Question) => question.learning_path === path);
+        setQuestions(filteredQuestions);
 
-          const filteredQuestions = questionsResponse.data.filter((question: Question) => question.learning_path === selectedLearningPath);
-          setQuestions(filteredQuestions);
+        const filteredAnswers = answersResponse.data.filter((answer: Answer) =>
+          answer.learning_path === path
+        );
+        setAnswers(filteredAnswers);
 
-          const filteredAnswers = answersResponse.data.filter((answer: Answer) =>
-            answer.id_assessment !== null && answer.learning_path === selectedLearningPath
-          );
-          setAnswers(filteredAnswers);
-
-          const initialAnswers: AnswerState = {};
-          filteredQuestions.forEach((question: Question) => {
-            initialAnswers[question.id_assessment.toString()] = "";
-          });
-          methods.reset({ answers: initialAnswers });
-        } else {
-          console.error("No learning path selected");
-          router.push("/pages/recommendations");
-        }
+        const initialAnswers: AnswerState = {};
+        filteredQuestions.forEach((question: Question) => {
+          initialAnswers[question.id_assessment.toString()] = "";
+        });
+        methods.reset({ answers: initialAnswers });
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
 
     fetchData();
-  }, [methods, router]);
-
-  useEffect(() => {
-    if (!api) {
-      return;
-    }
-
-    setCount(api.scrollSnapList().length);
-    setCurrent(api.selectedScrollSnap());
-
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap());
-    });
-  }, [api]);
+  }, [methods, router, path]);
 
   const handleNext = () => {
     if (api) {
       api.scrollNext();
+      setCurrent((prev) => prev + 1);
     }
   };
 
   const handlePrevious = () => {
     if (api) {
       api.scrollPrev();
+      setCurrent((prev) => prev - 1);
     }
   };
 
@@ -127,29 +110,41 @@ const SkillAssessment: React.FC = () => {
     }, 0);
   };
 
+  const calculateScores = (selectedAnswers: AnswerState) => {
+    const scores: { [key: string]: number } = {};
+
+    Object.keys(selectedAnswers).forEach((key) => {
+      const selectedAnswerId = parseInt(selectedAnswers[key], 10);
+      const answer = answers.find((answer) => answer.id_answer === selectedAnswerId);
+      if (answer) {
+        scores[answer.learning_path] = (scores[answer.learning_path] || 0) + answer.point;
+      }
+    });
+
+    return scores;
+  };
+
   const onSubmit = async (data: FormValues) => {
     console.log("You submitted the following values:", data);
     const totalPoint = calculateTotalPoint(data.answers);
-    const level = classifyLevel(totalPoint);
-    localStorage.setItem("assessment_level", level);
-    const learningPath = questions[0]?.learning_path || "Unknown";
-    localStorage.setItem("learning_path", learningPath);
+    const scores = calculateScores(data.answers);
+    const topScores = Object.entries(scores)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 3);
 
     try {
-      await axios.post('/api/score', {
-        learning_path: learningPath,
-        assessment_point: totalPoint,
-      });
+      for (const [key, value] of topScores) {
+        const postData = {
+          id_user: 255,
+          learning_path: key,
+          assessment_point: value,
+        };
+        await axios.post("/api/score-assessment", postData);
+      }
       router.push("/pages/courses");
     } catch (error) {
       console.error("Error saving score:", error);
     }
-  };
-
-  const classifyLevel = (point: number) => {
-    if (point <= 4) return "BEGINNER";
-    if (point <= 7) return "INTERMEDIATE";
-    return "PROFESSIONAL";
   };
 
   return (
@@ -180,20 +175,20 @@ const SkillAssessment: React.FC = () => {
                           }}
                         >
                           {answers
-                          .filter((answer) => answer.id_assessment === question.id_assessment)
-                          .map((answer) => (
-                            <FormItem
-                              key={answer.id_answer}
-                              className="flex flex-row items-start space-x-3 space-y-0 rounded drop-shadow-md px-10 py-4 my-2 bg-white"
-                            >
-                              <FormControl>
-                                <RadioGroupItem value={answer.id_answer.toString()} />
-                              </FormControl>
-                              <div className="space-y-1 leading-none">
-                                <FormLabel>{answer.text}</FormLabel>
-                              </div>
-                            </FormItem>
-                          ))}
+                            .filter((answer) => answer.id_assessment === question.id_assessment)
+                            .map((answer) => (
+                              <FormItem
+                                key={answer.id_answer}
+                                className="flex flex-row items-start space-x-3 space-y-0 rounded drop-shadow-md px-10 py-4 my-2 bg-white"
+                              >
+                                <FormControl>
+                                  <RadioGroupItem value={answer.id_answer.toString()} />
+                                </FormControl>
+                                <div className="space-y-1 leading-none">
+                                  <FormLabel>{answer.text}</FormLabel>
+                                </div>
+                              </FormItem>
+                            ))}
                         </RadioGroup>
                       )}
                     />

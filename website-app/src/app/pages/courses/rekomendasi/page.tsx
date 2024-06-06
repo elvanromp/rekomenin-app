@@ -15,7 +15,7 @@ const Rekomendasi: React.FC = () => {
   useEffect(() => {
     const fetchUserPaths = async () => {
       try {
-        const response = await axios.get(`/api/score?id_user=${id_user}`);
+        const response = await axios.get(`/api/score-preferensi?id_user=${id_user}`);
         const userPaths = response.data;
         setTopPaths(userPaths.map((path: { learning_path: string }) => path.learning_path));
       } catch (error) {
