@@ -4,7 +4,7 @@ import db from "../../config/db";
 export async function GET() {
   try {
     const results = await new Promise((resolve, reject) => {
-      db.query("SELECT * FROM learning-path", (err: any, results: []) => {
+      db.query("SELECT * FROM learning_path", (err: any, results: []) => {
         if (err) {
           reject(err);
         } else {

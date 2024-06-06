@@ -4,7 +4,7 @@ import db from "../../config/db";
 export async function GET() {
   try {
     const results = await new Promise((resolve, reject) => {
-      db.query("SELECT id_answer, id_assessment, point, text, learning_path FROM answers WHERE id_assessment IS NOT NULL", (err: any, results: []) => {
+      db.query("SELECT * FROM skill_assessment", (err: any, results: []) => {
         if (err) {
           reject(err);
         } else {

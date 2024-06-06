@@ -121,7 +121,7 @@ const Preferensi: React.FC = () => {
         preferensi_point: value,
       };
       axios
-        .post("/api/score", postData)
+        .post("/api/score-preferensi", postData)
         .then((response) => {
           console.log(response.data);
         })

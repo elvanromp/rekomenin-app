@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from 'lucide-react';
 import axios from 'axios';
+import Link from 'next/link';
 
 const id_user = 255;
 
@@ -26,6 +27,7 @@ const Rekomendasi: React.FC = () => {
   }, []);
 
   const handlePathClick = (path: string) => {
+    localStorage.setItem('selectedLearningPath', path);
     router.push("/pages/courses/skill-assessment");
   };
 
@@ -34,10 +36,12 @@ const Rekomendasi: React.FC = () => {
       <h1>Rekomendasi Learning Path</h1>
       <div className="grid grid-flow-col auto-cols-max">
         {topPaths.map((path, index) => (
-          <button onClick={() => handlePathClick(path)} className="flex bg-[#FAC19E] p-3 mr-4 w-72 items-center justify-between rounded-lg" key={index}>
-            <p className="m-0">{path}</p>
-            <ArrowRight/>
-          </button>
+          <Link href={`/pages/courses/quiz/${path}`} key={index}>
+            <button className="flex bg-[#FAC19E] p-3 mr-4 w-72 items-center justify-between rounded-lg">
+              <p className="m-0">{path}</p>
+              <ArrowRight/>
+            </button>
+          </Link>
         ))}
       </div>
     </div>
