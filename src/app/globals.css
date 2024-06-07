@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #F1F5F1;
+}
+.pri-c{
+  color: #1B4332;
+}
+.title {
+  font-weight: bolder;
+}
+.course-path li {
+  color: grey;
+  padding: 4px 10px;
+  margin-left: 2rem;
+  margin-right: 2rem;
+  font-weight: 600;
+  border-radius: 1rem;
+}
+
+.course-path li:hover {
+  background-color: rgb(209 213 219);
+  color: black;
+  padding: 4px 10px;
+  border-radius: 1rem;
+}
+
+.active-path {
+  color: black;
+}
+
+.course-offer {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+.course-wrapper {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.course {
+  min-height: 20vh;
+  display: flex;
+  font-size: 1rem;
+  flex-direction: column;
+}
+.course h3 {
+  font-size: 1rem; 
+  line-height: 1.5rem; 
+  font-weight: 500;
+}
+.card-path {
+  font-size: 0.8rem; 
+  line-height: 1rem; 
+  font-weight: 500;
+}
+
+.course-card {
+  box-shadow: 0px 4px 4px 4px rgba(0, 0, 0, 0.2);
+  border-radius: 1rem;
+}
+
+.course-stat {
+  display: flex;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
