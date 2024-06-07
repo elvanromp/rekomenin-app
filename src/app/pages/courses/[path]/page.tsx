@@ -48,6 +48,7 @@ const LearningPath: FC = () => {
     };
 
     fetchCourses();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path]);
 
   const getPath = (): string => {

@@ -18,35 +18,3 @@ export async function GET() {
     return NextResponse.json({ message: error }, { status: 500 });
   }
 }
-
-export async function POST(request: {
-  json: () =>
-    | PromiseLike<{
-        learning_path_name: any;
-      }>
-    | {
-        learning_path_name: any;
-      };
-}) {
-  try {
-    const { learning_path_name } = await request.json();
-
-    console.log(learning_path_name);
-
-    const result = await db.query("INSERT INTO learning-path SET ?", {
-      learning_path_name,
-    });
-
-    return NextResponse.json({
-      learning_path_name,
-      id: result.insertlearning_path_Id,
-    });
-  } catch (error) {
-    return NextResponse.json(
-      { message: error },
-      {
-        status: 500,
-      }
-    );
-  }
-}

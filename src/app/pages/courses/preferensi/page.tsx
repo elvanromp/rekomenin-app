@@ -79,7 +79,6 @@ const Preferensi: React.FC = () => {
     };
 
     fetchQuestion();
-    console.log(allQuestion);
   }, []);
 
   const [answers, setAnswers] = useState<AnswerState>(() => {
